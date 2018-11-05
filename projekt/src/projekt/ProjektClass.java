@@ -2,10 +2,12 @@ package projekt;
 
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.sql.*;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;
@@ -55,6 +57,8 @@ public class ProjektClass extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -92,32 +96,73 @@ public class ProjektClass extends JFrame {
 		passwordField.setBounds(569, 385, 143, 20);
 		frame.getContentPane().add(passwordField);
 
-		
+		/**
+		* Tworzymy przycisk do logowania i nas³uchujemy...
+		* Jeœli dana osoba kliknie go to wewnêtrzna
+		* metoda s³u¿y do zalogowania siê w programie
+		* 
+		* Jeœli siê uda zamykamy to okno wykonuj¹c frame.dispose()
+		* i otwieramy nowe okno z w³aœciwym programem zawarte w klasie Welcome
+		* 
+		* @param uname - login pobierany z pola LOGIN
+		* @param pass - haslo pobierane z pola HAS£O
+		*/
 		JButton btnLogowanie = new JButton("logowanie");
 		btnLogowanie.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String uname = loginField.getText();
 				@SuppressWarnings("deprecation")
 				String pass = passwordField.getText();
-			   if(uname.equals("abc") && pass.equals("123"))
-			   {
-			      Welcome wel = new Welcome();
+				
+				Connection con = null;
+				PreparedStatement st = null;
+				ResultSet rs = null;
+				
+				String sql="select * from uczniowie where imie=? and haslo=?";
+				try{
+				DBConnect connecting = new DBConnect();
+				con = DriverManager.getConnection("jdbc:mysql://localhost:3306/school?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC","root","");
+				st=con.prepareStatement(sql);
+				st.setString(1, uname);
+				st.setString(2, pass);
+				rs=st.executeQuery();
+				if(rs.next())
+				{
+				JOptionPane.showMessageDialog(null,"Witamy w Portalu Edukacyjnym");
+				  Welcome wel = new Welcome();
 			      wel.setVisible(true);
 			      //frame.setVisible(false);
 			      frame.dispose();
 			      //JLabel label = new JLabel("Witaj Uczniu:"+uname);
 			      //wel.getContentPane().add(label);
-			    }
-			    else
-			    {
-			      
-			    }
+				}
+				else
+				{
+				JOptionPane.showMessageDialog(null, "B³êdny LOGIN lub HAS£O");
+				}
+				}
+				catch(SQLException | HeadlessException ex)
+				{
+				JOptionPane.showMessageDialog(null,ex);
+				}
+			    
+			  
 			}
 		});
+		
 		btnLogowanie.setBounds(569, 416, 143, 23);
 		frame.getContentPane().add(btnLogowanie);
 		
 		JButton btnRejestracja = new JButton("rejestracja");
+		btnRejestracja.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				  Welcome wel = new Welcome();
+			      wel.setVisible(true);
+			      //frame.setVisible(false);
+			      frame.dispose();
+			}
+		});
 		btnRejestracja.setBounds(569, 450, 143, 23);
 		frame.getContentPane().add(btnRejestracja);
 		
